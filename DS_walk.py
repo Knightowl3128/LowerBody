@@ -27,13 +27,13 @@ body.set_angle(angles_l, 'Left')
 body.set_angle(angles_r, 'Right')
 body.get_all_pos()
 foot_last_pos = [0, 0]
-initiate_time: float = 0.5
+initiate_time = 0.4
 T_dbl = 0.1
-speed = 0.05
-zc = 0.6
+speed = 0.01
+zc = 0.35
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
-
+print(ysolve)
 k = 0
 Vc = []
 Xp = []
@@ -43,6 +43,7 @@ while True:
 
     body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], 0.6]])
     if abs(round(switch_timer, 3)) == 0:
+        print('inside switch', body.CoM + 0.09)
         print('this is switched %f', t)
         if t == 0:
             step_multi = 0  # first step takes only 1 step size but the second step covers twice the d/s
@@ -60,13 +61,13 @@ while True:
                                      [body.links_l[6].end[0, 1], -step_multi * step_size + body.links_l[6].end[0, 1]],
                                      bc_type=(((1, 0)), (1, 0)))
             swing_leg = 'Left'
-            switch_timer = initiate_time + T_dbl - speed
+            switch_timer = initiate_time + T_dbl
             ds_timer = T_dbl
             dbl_phase = False
             foot_last_pos[0] = r_6.end[0, 0]
             foot_last_pos[1] = r_6.end[0, 1]
             angles_r = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Right')
-            angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(speed), spline_h_l(speed)], 'Left')
+            angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(0), spline_h_l(0)], 'Left')
             # k = speed
         if not left_l:
             spline_h_r = CubicSpline([0, initiate_time / 2, initiate_time], [0, foot_height, 0],
@@ -75,7 +76,7 @@ while True:
                                      [body.links_r[6].end[0, 1], -step_multi * step_size + body.links_r[6].end[0, 1]],
                                      bc_type=(((1, 0)), (1, 0)))
             swing_leg = 'Right'
-            switch_timer = initiate_time + T_dbl - speed
+            switch_timer = initiate_time + T_dbl
             ds_timer = T_dbl
             dbl_phase = False
 
@@ -83,7 +84,7 @@ while True:
             foot_last_pos[0] = l_6.end[0, 0]
             foot_last_pos[1] = l_6.end[0, 1]
             angles_l = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Left')
-            angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(speed), spline_h_r(speed)], 'Right')
+            angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(0), spline_h_r(0)], 'Right')
             # print(foot_last_pos)
         left_l = not left_l
 
@@ -91,14 +92,18 @@ while True:
         switch_timer -= speed
 
         if swing_leg == 'Left':
+
             k = initiate_time + T_dbl - switch_timer
-            print('This is k', k)
+            print('This is k lefty', k)
             # k +=speed
             if round(k, 2) == initiate_time:
                 dbl_phase = True
             if dbl_phase == True:
                 k = initiate_time
+                print(k, body.CoM + 0.09)
+
             if abs(round(switch_timer, 4)) == 0:
+                switch_timer = 0
                 t += speed
                 continue
             angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(k), spline_h_l(k)], 'Left')
@@ -108,14 +113,17 @@ while True:
 
         elif swing_leg == 'Right':
             k = initiate_time + T_dbl - switch_timer
-            print(k)
+            print('This is k rigjt', k)
             # k+=speed
             if round(k, 2) == initiate_time:
                 dbl_phase = True
+
             if dbl_phase == True:
                 k = initiate_time
+                print(k, body.CoM + 0.09)
 
             if abs(round(switch_timer, 4)) == 0:
+                switch_timer = 0
                 t += speed
                 continue
             angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(k), spline_h_r(k)], 'Right')
@@ -124,7 +132,7 @@ while True:
     body.set_angle(angles_l, 'Left')
     body.set_angle(angles_r, 'Right')
     body.get_all_pos()
-    if iteration >= 0:
+    if iteration >= 2:
         x_zmp, y_zmp = body.find_zmp()
         X.append(x_zmp)
         Y.append(y_zmp)
@@ -143,8 +151,8 @@ while True:
         # ax1.scatter(t, x_zmp, c='green', s=10)
         # ax2.scatter(t, y_zmp, c='red', s=10)
     iteration += 1
-    # if iteration == 100:
-    #     break
+    if iteration == 200:
+        break
 
     # print('This is angle l ',angles_l)
     # print('This is angle r ',angles_r)

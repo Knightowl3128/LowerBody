@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 def LIPM(speed, T_supp, zc):
     t = linspace(0, T_supp, T_supp / speed)
+
     g = 9.810
 
     # initial condition

@@ -1,8 +1,8 @@
 from numpy import *
 from Link import *
 from scipy.interpolate import CubicSpline
-# import rospy
-# from std_msgs.msg import Float64
+import rospy
+from std_msgs.msg import Float64
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
