@@ -88,10 +88,11 @@ foot_last_pos = [0, 0]
 body.CoM = array([[0.015 - 0.09, 0, 0.6]])
 l_6.end = array([[0.09, 0, 0]])
 r_6.end = array([[-0.09, 0, 0]])
-initiate_time = 0.7
-T_dbl = 0.1
+# these are the best results initiate_time = 0.65 T_dbl = 0.1 zc = 0.6
+initiate_time = 0.65
+T_dbl = 0.09
 speed = 0.01
-zc = 0.9
+zc = 0.59
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 rate = rospy.Rate(1 / speed)
@@ -118,14 +119,14 @@ while not rospy.is_shutdown():
                                      [body.links_l[6].end[0, 1], -step_multi * step_size + body.links_l[6].end[0, 1]],
                                      bc_type=(((1, 0)), (1, 0)))
             swing_leg = 'Left'
-            switch_timer = initiate_time + T_dbl - speed
+            switch_timer = initiate_time + T_dbl
             ds_timer = T_dbl
             dbl_phase = False
             foot_last_pos[0] = r_6.end[0, 0]
             foot_last_pos[1] = r_6.end[0, 1]
             angles_r = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Right')
 
-            angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(speed), spline_h_l(speed)], 'Left')
+            angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(0), spline_h_l(0)], 'Left')
             # k = speed
         if not left_l:
             spline_h_r = CubicSpline([0, initiate_time / 2, initiate_time], [0, foot_height, 0],
@@ -134,14 +135,14 @@ while not rospy.is_shutdown():
                                      [body.links_r[6].end[0, 1], -step_multi * step_size + body.links_r[6].end[0, 1]],
                                      bc_type=((1, 0), (1, 0)))
             swing_leg = 'Right'
-            switch_timer = initiate_time + T_dbl - speed
+            switch_timer = initiate_time + T_dbl
             ds_timer = T_dbl
             dbl_phase = False
             # k = speed
             foot_last_pos[0] = l_6.end[0, 0]
             foot_last_pos[1] = l_6.end[0, 1]
             angles_l = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Left')
-            angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(speed), spline_h_r(speed)], 'Right')
+            angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(0), spline_h_r(0)], 'Right')
             # print(foot_last_pos)
         left_l = not left_l
 
@@ -158,7 +159,7 @@ while not rospy.is_shutdown():
                 k = initiate_time
                 print(k, body.CoM + 0.09)
 
-            if abs(round(switch_timer - speed, 4)) == 0:
+            if abs(round(switch_timer, 4)) == 0:
                 switch_timer = 0
                 t += speed
                 continue
@@ -176,7 +177,7 @@ while not rospy.is_shutdown():
             if dbl_phase == True:
                 k = initiate_time
 
-            if abs(round(switch_timer - speed, 4)) == 0:
+            if abs(round(switch_timer, 4)) == 0:
                 switch_timer = 0
                 t += speed
                 continue
