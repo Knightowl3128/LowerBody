@@ -26,6 +26,8 @@ r_4.pub = rospy.Publisher('/mono/r_knee_pitch_position/command', Float64, queue_
 r_5.pub = rospy.Publisher('/mono/r_ankle_pitch_position/command', Float64, queue_size=1)
 r_6.pub = rospy.Publisher('/mono/r_ankle_roll_position/command', Float64, queue_size=1)
 
+# rospy.Subscriber("chatter", String, callback)
+
 if not show:
 
     initiate_time = 5
@@ -53,12 +55,16 @@ rate = rospy.Rate(1 / speed)
 # spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
 #                         [-1.5707963267948966, 0.5610612566993562, -1.0000099541506042],initiate_time)
 
-# spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
-#                                                      body.inverse_kinematics([0.015-0.09, 0, 0.6],"Right")[2:],
-#                                                      initiate_time)
+initial_height = 0.70
+
+body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
-                                                     [-1.4204248987877621, 0.5362958375469041, -0.9566801401928506],
+                                                     body.inverse_kinematics([0.09, 0, 0], "Left")[2:],
                                                      initiate_time)
+
+# spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
+#                                                      [-1.4204248987877621, 0.5362958375469041, -0.9566801401928506],
+#                                                      initiate_time)
 msg = Float64()
 # bending the knees
 t = 0
@@ -85,21 +91,27 @@ foot_origin_ds = 0.09
 
 foot_last_pos = [0, 0]
 
-body.CoM = array([[0.015 - 0.09, 0, 0.6]])
+body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 l_6.end = array([[0.09, 0, 0]])
 r_6.end = array([[-0.09, 0, 0]])
 # these are the best results initiate_time = 0.65 T_dbl = 0.1 zc = 0.6
-initiate_time = 0.65
+initiate_time = 0.6
 T_dbl = 0.09
 speed = 0.01
-zc = 0.59
+zc = 0.5
+# initiate_time = 0.43
+# T_dbl = 0.09
+# speed = 0.01
+# zc = 0.36
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 rate = rospy.Rate(1 / speed)
 
 print(body.inverse_kinematics([0.09, 0, 0], 'Left'))
 while not rospy.is_shutdown():
-    body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], 0.6]])
+    body.ros_subscribe()
+    print(l_5.process_value)
+    body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], initial_height]])
 
     if abs(round(switch_timer, 3)) == 0:
         if t == 0:

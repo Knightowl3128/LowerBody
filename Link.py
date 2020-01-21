@@ -24,6 +24,7 @@ class Link:
         self.rot = None  # this argument using to convert self.R to axis angle
         self.a = None  # Axis angle of link
         self.pub = None
-        """Data for 3D simulation"""
-        self.start = None
-        self.end = None
+        self.process_value = None
+
+    def callback(self, data):
+        self.process_value = data.process_value

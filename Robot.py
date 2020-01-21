@@ -5,6 +5,7 @@ import rospy
 from std_msgs.msg import Float64
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from control_msgs.msg import JointControllerState
 
 
 class Robot(Link):
@@ -131,11 +132,16 @@ class Robot(Link):
             a3 = 9  # thigh
             a4 = 3  # hip
         else:
+            # off = 0.09
+            # a1 = 0.045  # ankle
+            # a2 = .313  # femur
+            # a3 = .25  # thigh
+            # a4 = 0.06  # hip
             off = 0.09
             a1 = 0.045  # ankle
-            a2 = .313  # femur
-            a3 = .25  # thigh
-            a4 = 0.06  # hip
+            a2 = .315  # femur
+            a3 = .3  # thigh
+            a4 = 0.068  # hip
         if direction == 'Left':
             originPosition[0] = originPosition[0] + off
         elif direction == 'Right':
@@ -329,6 +335,18 @@ class Robot(Link):
 
             listnow = self.links_r
 
+    def ros_subscribe(self):
+        rospy.Subscriber('/mono/l_hip_roll_position/state', JointControllerState, self.links_l[2].callback)
+        rospy.Subscriber('/mono/l_hip_pitch_position/state', JointControllerState, self.links_l[3].callback)
+        rospy.Subscriber('/mono/l_knee_pitch_position/state', JointControllerState, self.links_l[4].callback)
+        rospy.Subscriber('/mono/l_ankle_pitch_position/state', JointControllerState, self.links_l[5].callback)
+        rospy.Subscriber('/mono/l_ankle_roll_position/state', JointControllerState, self.links_l[6].callback)
+
+        rospy.Subscriber('/mono/r_hip_roll_position/state', JointControllerState, self.links_r[2].callback)
+        rospy.Subscriber('/mono/r_hip_pitch_position/state', JointControllerState, self.links_r[3].callback)
+        rospy.Subscriber('/mono/r_knee_pitch_position/state', JointControllerState, self.links_r[4].callback)
+        rospy.Subscriber('/mono/r_ankle_pitch_position/state', JointControllerState, self.links_r[5].callback)
+        rospy.Subscriber('/mono/r_ankle_roll_position/state', JointControllerState, self.links_r[6].callback)
     def ros_publish(self):
         msg = Float64()
         listnow = self.links_l
