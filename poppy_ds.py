@@ -95,7 +95,7 @@ body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 l_6.end = array([[0.09, 0, 0]])
 r_6.end = array([[-0.09, 0, 0]])
 # these are the best results initiate_time = 0.65 T_dbl = 0.1 zc = 0.6
-initiate_time = 0.6
+initiate_time = 0.7
 T_dbl = 0.09
 speed = 0.01
 zc = 0.5
