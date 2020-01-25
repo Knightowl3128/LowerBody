@@ -28,7 +28,7 @@ body.set_angle(angles_l, 'Left')
 body.set_angle(angles_r, 'Right')
 body.get_all_pos()
 foot_last_pos = [0, 0]
-
+initial_height = 0.70
 speed = 0.025
 initiate_time = 0.5
 zc = 0.4
@@ -42,7 +42,7 @@ time_list = []
 while True:
     # body.CoM = array([[-traj(t)[2], -traj(t)[1], 0.6]])
     # body.CoM = array([[ysolve[int(t / speed)] - 0.09, -xsolve[int(t / speed)], 0.6]])
-    body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], 0.6]])
+    body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], initial_height]])
     if abs(round(switch_timer, 3)) == 0:
         print('this is switched %f', t)
         print('This is l6', l_6.end)

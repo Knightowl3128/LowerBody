@@ -21,8 +21,7 @@ while True:
     ax.axes.set_xlim3d(left=-1, right=1)
     ax.axes.set_ylim3d(bottom=-1, top=1)
     ax.axes.set_zlim3d(bottom=0, top=.8)
-    body.CoM = array([[0.07 * cos(6.5 * t), 0, .6]])
-    body.CoM = array([[-0.075, 0., 0.6]])
+    body.CoM = array([[0.07 * cos(3 * t), 0, .6]])
 
     v = (body.find_CoM_Pos()[0][0, 0] - bh) / speed
     bh = body.find_CoM_Pos()[0][0, 0]

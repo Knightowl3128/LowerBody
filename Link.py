@@ -25,6 +25,7 @@ class Link:
         self.a = None  # Axis angle of link
         self.pub = None
         self.process_value = None
-
+        self.start = None
+        self.end = None
     def callback(self, data):
         self.process_value = data.process_value

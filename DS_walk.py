@@ -27,10 +27,11 @@ body.set_angle(angles_l, 'Left')
 body.set_angle(angles_r, 'Right')
 body.get_all_pos()
 foot_last_pos = [0, 0]
-initiate_time = 0.4
-T_dbl = 0.1
+initial_height = 0.7
+initiate_time = 0.6
+T_dbl = 0.09
 speed = 0.01
-zc = 0.35
+zc = 0.5
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 print(ysolve)
@@ -158,6 +159,7 @@ while True:
     # print('This is angle r ',angles_r)
     # print('This is l6 ',l_6.end)
     # print('This is r6 ', r_6.end)
+    ax.axes.set_ylim3d(bottom=-1 - iteration / 100, top=1)
     body.draw_all(ax)
 
     ax.scatter(body.find_CoM_Pos()[0][0, 0], body.find_CoM_Pos()[0][0, 1], body.find_CoM_Pos()[0][0, 2])

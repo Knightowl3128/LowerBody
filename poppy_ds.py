@@ -4,13 +4,12 @@ from numpy import *
 import matplotlib.pyplot as plt
 from LIPM_with_dsupport import *
 import rospy
-from std_msgs.msg import Float64
+from geometry_msgs.msg import Point
 import subprocess
 from mono_define import *
 
 rospy.init_node('mono_move')
-fig = plt.figure(1)
-ax = fig.add_subplot(111, projection='3d')
+
 
 show = False
 
@@ -50,6 +49,17 @@ if not show:
 else:
     initiate_time = 5
     speed = 0.1
+
+
+def send_pelvis_data(pos):
+    msg = Point()
+    msg.x = -pos[0, 0]
+    msg.y = -pos[0, 1]
+    msg.z = pos[0, 2]
+    pub.publish(msg)
+
+
+pub = rospy.Publisher('python_pelvis_data', Point, queue_size=1)
 rate = rospy.Rate(1 / speed)
 #####initiate##########
 # spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
@@ -58,6 +68,8 @@ rate = rospy.Rate(1 / speed)
 initial_height = 0.70
 
 body.CoM = array([[0.015 - 0.09, 0, initial_height]])
+# body.CoM = array([[0, 0, initial_height]])
+
 spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
                                                      body.inverse_kinematics([0.09, 0, 0], "Left")[2:],
                                                      initiate_time)
@@ -69,6 +81,7 @@ msg = Float64()
 # bending the knees
 t = 0
 while t <= initiate_time and show == False:
+    send_pelvis_data(body.CoM)
     print(1)
     angles_l = [0, 0, spline_1(t), spline_2(t), spline_3(t), pi / 2]
     angles_r = [0, 0, spline_1(t), spline_2(t), spline_3(t), pi / 2]
@@ -80,6 +93,22 @@ while t <= initiate_time and show == False:
 
     t += speed
     rate.sleep()
+t = 0
+# while True:
+#     body.CoM = array([[0.07 * sin(3 * t), 0, initial_height]])
+#
+#     send_pelvis_data(body.CoM)
+#     angles_l = body.inverse_kinematics([0.09, 0, 0], "Left")
+#     angles_r = body.inverse_kinematics([-0.09, 0, 0], "Right")
+#
+#     body.set_angle(angles_l, 'Left')
+#     body.set_angle(angles_r, 'Right')
+#     body.get_all_pos()
+#     body.ros_publish()
+#
+#     t += speed
+#     rate.sleep()
+
 
 t = 0
 foot_height = 0.08
@@ -95,24 +124,26 @@ body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 l_6.end = array([[0.09, 0, 0]])
 r_6.end = array([[-0.09, 0, 0]])
 # these are the best results initiate_time = 0.65 T_dbl = 0.1 zc = 0.6
-initiate_time = 0.7
+# initiate_time = 0.63
+# T_dbl = 0.08
+# speed = 0.01
+# zc = 0.6
+initiate_time = 0.46
 T_dbl = 0.09
 speed = 0.01
-zc = 0.5
-# initiate_time = 0.43
-# T_dbl = 0.09
-# speed = 0.01
-# zc = 0.36
+zc = 0.36
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 rate = rospy.Rate(1 / speed)
-
 print(body.inverse_kinematics([0.09, 0, 0], 'Left'))
+
 while not rospy.is_shutdown():
+    if iteration >= len(ysolve) - 20:
+        break
     body.ros_subscribe()
     print(l_5.process_value)
     body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], initial_height]])
-
+    send_pelvis_data(body.CoM)
     if abs(round(switch_timer, 3)) == 0:
         if t == 0:
             step_multi = 0  # first step takes only 1 step size but the second step covers twice the d/s

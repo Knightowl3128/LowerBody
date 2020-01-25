@@ -312,7 +312,7 @@ class Robot(Link):
 
     def draw_all(self, ax):
         ax.axes.set_xlim3d(left=-0.35, right=0.35)
-        ax.axes.set_ylim3d(bottom=-1, top=1)
+
         ax.axes.set_zlim3d(bottom=0, top=.8)
         listnow = self.links_l
         for i in range(2):
