@@ -28,10 +28,10 @@ body.set_angle(angles_r, 'Right')
 body.get_all_pos()
 foot_last_pos = [0, 0]
 initial_height = 0.7
-initiate_time = 0.6
-T_dbl = 0.09
-speed = 0.01
-zc = 0.5
+initiate_time = 0.5
+T_dbl = 0.1
+speed = 0.05
+zc = 0.6
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 print(ysolve)

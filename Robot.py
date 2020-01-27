@@ -3,9 +3,9 @@ from Link import *
 from scipy.interpolate import CubicSpline
 import rospy
 from std_msgs.msg import Float64
+from control_msgs.msg import JointControllerState
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-from control_msgs.msg import JointControllerState
 
 
 class Robot(Link):
@@ -51,7 +51,7 @@ class Robot(Link):
                 self.update_angular_dynamics(j.dh[0, 0], j)
                 continue
             if j.name == 'Ankle_r':
-                j.dh[0, 0] = pi / 2 + listnow[2].q
+                j.dh[0, 0] = pi / 2 - listnow[2].q
                 self.update_angular_dynamics(j.dh[0, 0], j)
                 continue
             j.dh[0, 0] = angles[i]
@@ -141,7 +141,7 @@ class Robot(Link):
             a1 = 0.045  # ankle
             a2 = .315  # femur
             a3 = .3  # thigh
-            a4 = 0.068  # hip
+            a4 = 0.068 + 0.036  # hip
         if direction == 'Left':
             originPosition[0] = originPosition[0] + off
         elif direction == 'Right':
@@ -149,19 +149,14 @@ class Robot(Link):
 
         originPosition[2] = originPosition[2] - a4
         pos[2] = pos[2] + a1
-        for i, val in enumerate(pos):
-            pos[i] = pos[i] - originPosition[i]
-
-        X = 0.0000
-        Y = 0.0000
-        Z = 0.00000
+        pos = subtract(pos, originPosition)
 
         x2 = pos[0]
         y2 = pos[1]
         z2 = pos[2]
 
-        l = sqrt((x2 - X) ** 2 + (y2 - Y) ** 2 + (z2 - Z) ** 2)
-        lz = sqrt((x2 - X) ** 2 + (z2 - Z) ** 2)
+        l = sqrt((x2) ** 2 + (y2) ** 2 + (z2) ** 2)  # distance from origin
+        lz = sqrt((x2) ** 2 + (z2) ** 2)
         theta1 = math.atan2(x2, z2)
         theta21 = math.atan2(y2, lz)
         c22 = (a2 ** 2 + l ** 2 - a3 ** 2) / (2 * a2 * l)
@@ -184,7 +179,8 @@ class Robot(Link):
         if theta1 > 0:
             theta1 = theta1 - 2 * pi
 
-        return [0, 0, theta1, -theta2, -theta3]
+        # return [0, 0, theta1, -theta2, -theta3] //this is the earlier one used
+        return [0, 0, pi + theta1, theta2, theta3]
 
     def find_CoM_Pos(self):
         listnow = self.links_l
@@ -347,6 +343,7 @@ class Robot(Link):
         rospy.Subscriber('/mono/r_knee_pitch_position/state', JointControllerState, self.links_r[4].callback)
         rospy.Subscriber('/mono/r_ankle_pitch_position/state', JointControllerState, self.links_r[5].callback)
         rospy.Subscriber('/mono/r_ankle_roll_position/state', JointControllerState, self.links_r[6].callback)
+
     def ros_publish(self):
         msg = Float64()
         listnow = self.links_l
@@ -354,11 +351,9 @@ class Robot(Link):
             for index, val in enumerate(listnow):
                 if val.pub != None:
                     if val.name == 'Hip_2':
-                        msg.data = -val.q - pi / 2
-                    elif val.name == 'Ankle_r':
-                        msg.data = val.q
+                        msg.data = val.q - pi / 2
                     else:
-                        msg.data = -val.q
+                        msg.data = val.q
                     val.pub.publish(msg)
             listnow = self.links_r
         pass

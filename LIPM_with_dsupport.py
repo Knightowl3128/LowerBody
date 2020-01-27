@@ -17,16 +17,24 @@ def LIPM(speed, T_supp, T_dbl, zc):
 
     # wp = array([[0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0],
     #             [0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18]])
-    wp = array(
-        [[0, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0],
-         [0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18,
-          0.18]])
+    size = 200
+    first = .09 * ones((1, size))
+    second = 0.18 * ones((1, size))
+    temp = concatenate((first, second), axis=0)
+    wp = array([[0],
+                [0.18]])
+    wp = concatenate((wp, temp), axis=1)
+
+    # wp = array(
+    #     [[0, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0.09, 0],
+    #      [0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18,
+    #       0.18]])
     # wp = array([[0, 0.09, 0.09, 0.09, 0],
     #             [0.18, 0.18, 0.18, 0.18, 0.18, ]])
 
     n = -1  # change this depending on T time
     N = len(wp.T)
-    p = zeros([2, 100])  # px0 is 0 and py0 is 0 as it is right leg
+    p = zeros([2, size + 1])  # px0 is 0 and py0 is 0 as it is right leg
     p_mod = zeros([2, N + 1])
 
     while True:
@@ -97,8 +105,7 @@ def LIPM(speed, T_supp, T_dbl, zc):
         a4 = Y[2, 0]
         dbl_y = a0 + a1 * t + a2 * t ** 2 + a3 * t ** 3 + a4 * t ** 4
         dbl_vy = a1 + 2 * a2 * t + 3 * a3 * t ** 2 + 4 * a4 * t ** 3
-        print(y)
-        print(dbl_y)
+
         if n != N - 2:
             x = concatenate((x, dbl_x[1:]))
             v_x = concatenate((v_x, dbl_vx[1:]))
@@ -123,12 +130,13 @@ def LIPM(speed, T_supp, T_dbl, zc):
 
     return xsolve, vxsolve, ysolve, vysolve, p_mod
 
-# T_supp = 0.5
-# T_dbl = 0.1
-# speed = 0.01
-# zc = 0.6
-# xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed,T_supp, T_dbl, zc)
-#
+
+T_supp = 0.5
+T_dbl = 0.1
+speed = 0.01
+zc = 0.6
+xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, T_supp, T_dbl, zc)
+
 # t = linspace(0, (4)*(T_supp+T_dbl), len(vxsolve))
 # print(p_mod)
 # plt.plot(t, ysolve)

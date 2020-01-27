@@ -1,0 +1,42 @@
+import random
+from pyeasyga import pyeasyga
+from gazebo_walk_ga import *
+
+# setup seed data
+seed_data = []
+
+# initialise the GA
+ga = pyeasyga.GeneticAlgorithm(seed_data,
+                               population_size=10,
+                               generations=100,
+                               crossover_probability=0.8,
+                               mutation_probability=0.2,
+                               elitism=True,
+                               maximise_fitness=True)
+
+
+# define and set function to create a candidate solution representation
+def create_individual(data):
+    # initiate_time,T_dbl,zc
+    initiate_time = random.choice([x / 100 for x in range(40, 71)])
+    T_dbl = random.choice([0.09, 0.1])
+    zc = random.choice([x / 100 for x in range(40, 71)])
+    individual = [initiate_time, T_dbl, zc]
+    return individual
+
+
+ga.create_individual = create_individual
+
+
+def fitness(individual, data):
+    walk_time = 0
+    walk_time = walk_test(individual[0], individual[1], individual[2])
+    print("This is individual and walk time", individual, walk_time)
+    return walk_time
+
+
+ga.fitness_function = fitness
+
+ga.run()  # run the GA
+print("--------------done----------------------")
+print(ga.best_individual())

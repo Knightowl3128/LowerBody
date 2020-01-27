@@ -31,8 +31,8 @@ if not show:
 
     initiate_time = 5
     speed = 0.01
-    angles_l = [0, 0, -pi / 2, 0, 0, pi / 2]
-    angles_r = [0, 0, -pi / 2, 0, 0, pi / 2]
+    angles_l = [0, 0, pi / 2, 0, 0, 0, 0]
+    angles_r = [0, 0, pi / 2, 0, 0, 0, 0]
     body.set_angle(angles_l, 'Left')
     body.set_angle(angles_r, 'Right')
     body.get_all_pos()
@@ -70,7 +70,7 @@ initial_height = 0.70
 body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 # body.CoM = array([[0, 0, initial_height]])
 
-spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
+spline_1, spline_2, spline_3 = body.transition_angle([pi / 2, 0, 0],
                                                      body.inverse_kinematics([0.09, 0, 0], "Left")[2:],
                                                      initiate_time)
 
@@ -111,37 +111,34 @@ t = 0
 
 
 t = 0
-foot_height = 0.08
+foot_height = 0.05
 step_size = .1
 iteration = 0
 switch_timer = 0
-left_l = False
+left_l = True
 foot_origin_ds = 0.09
 
 foot_last_pos = [0, 0]
 
 body.CoM = array([[0.015 - 0.09, 0, initial_height]])
-l_6.end = array([[0.09, 0, 0]])
-r_6.end = array([[-0.09, 0, 0]])
+
 # these are the best results initiate_time = 0.65 T_dbl = 0.1 zc = 0.6
 # initiate_time = 0.63
 # T_dbl = 0.08
 # speed = 0.01
 # zc = 0.6
-initiate_time = 0.46
+initiate_time = 0.5
 T_dbl = 0.09
 speed = 0.01
-zc = 0.36
+zc = 0.5
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 rate = rospy.Rate(1 / speed)
-print(body.inverse_kinematics([0.09, 0, 0], 'Left'))
 
 while not rospy.is_shutdown():
     if iteration >= len(ysolve) - 20:
         break
     body.ros_subscribe()
-    print(l_5.process_value)
     body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], initial_height]])
     send_pelvis_data(body.CoM)
     if abs(round(switch_timer, 3)) == 0:
@@ -200,7 +197,6 @@ while not rospy.is_shutdown():
                 dbl_phase = True
             if dbl_phase == True:
                 k = initiate_time
-                print(k, body.CoM + 0.09)
 
             if abs(round(switch_timer, 4)) == 0:
                 switch_timer = 0
