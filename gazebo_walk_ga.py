@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
 from LIPM_with_dsupport import *
-
+import random
 import subprocess
 from mono_define import *
 from nav_msgs.msg import Odometry
+from std_srvs.srv import Empty
 
 
-def walk_test(initiate_time, T_dbl, zc):
+def walk_test(initiate_time, T_dbl, zc, foot_height):
     rospy.init_node('mono_move')
-
+    print('function called')
     l_2.pub = rospy.Publisher('/mono/l_hip_roll_position/command', Float64, queue_size=1)
     l_3.pub = rospy.Publisher('/mono/l_hip_pitch_position/command', Float64, queue_size=1)
     l_4.pub = rospy.Publisher('/mono/l_knee_pitch_position/command', Float64, queue_size=1)
@@ -22,6 +23,8 @@ def walk_test(initiate_time, T_dbl, zc):
     r_5.pub = rospy.Publisher('/mono/r_ankle_pitch_position/command', Float64, queue_size=1)
     r_6.pub = rospy.Publisher('/mono/r_ankle_roll_position/command', Float64, queue_size=1)
 
+    # reset_simulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
+
     fall = False
 
     def callback(data):
@@ -31,9 +34,12 @@ def walk_test(initiate_time, T_dbl, zc):
             fall = True
         else:
             fall = False
+        # print(fall,height)
 
+    odom_sub = rospy.Subscriber("/mono/odom", Odometry, callback, queue_size=1)
     def initiate_robot():
         nonlocal fall
+
         initiate_time = 5
         speed = 0.01
         angles_l = [0, 0, pi / 2, 0, 0, 0, 0]
@@ -50,6 +56,7 @@ def walk_test(initiate_time, T_dbl, zc):
 
         r = subprocess.check_call("rosservice call gazebo/unpause_physics", shell=True)
         rospy.sleep(0.4)
+        # reset_simulation()
         return pose_robot()
 
     def pose_robot():
@@ -58,7 +65,6 @@ def walk_test(initiate_time, T_dbl, zc):
         initiate_time = 5
         speed = 0.01
         rate = rospy.Rate(1 / speed)
-
         initial_height = 0.70
 
         body.CoM = array([[0.015 - 0.09, 0, initial_height]])
@@ -71,8 +77,8 @@ def walk_test(initiate_time, T_dbl, zc):
 
             angles_l = [0, 0, spline_1(t), spline_2(t), spline_3(t), pi / 2]
             angles_r = [0, 0, spline_1(t), spline_2(t), spline_3(t), pi / 2]
-            rospy.Subscriber("/mono/odom", Odometry, callback)
 
+            odom_sub = rospy.Subscriber("/mono/odom", Odometry, callback, queue_size=1)
             if t >= 3 and fall:
                 print('-------------robot has fallen--------')
                 return False
@@ -92,7 +98,7 @@ def walk_test(initiate_time, T_dbl, zc):
             continue
 
     t = 0
-    foot_height = 0.05
+    # foot_height = 0.05
     step_size = .1
     iteration = 0
     switch_timer = 0
@@ -111,14 +117,27 @@ def walk_test(initiate_time, T_dbl, zc):
 
     speed = 0.01
     try:
+        print(initiate_time, T_dbl, zc, foot_height)
         xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 
         body.time_step = speed
         rate = rospy.Rate(1 / speed)
         print("---------------started walking------------------------------------------")
         while not rospy.is_shutdown():
-            rospy.Subscriber("/mono/odom", Odometry, callback)
+            odom_sub = rospy.Subscriber("/mono/odom", Odometry, callback, queue_size=1)
             if fall == True:
+                odom_sub.unregister()
+                l_2.pub.unregister()
+                l_3.pub.unregister()
+                l_4.pub.unregister()
+                l_5.pub.unregister()
+                l_6.pub.unregister()
+                r_2.pub.unregister()
+                r_3.pub.unregister()
+                r_4.pub.unregister()
+                r_5.pub.unregister()
+                r_6.pub.unregister()
+
                 return iteration
 
             if iteration >= len(ysolve) - 20:
@@ -219,6 +238,28 @@ def walk_test(initiate_time, T_dbl, zc):
             iteration += 1
             rate.sleep()
     except:
+        odom_sub.unregister()
+        l_2.pub.unregister()
+        l_3.pub.unregister()
+        l_4.pub.unregister()
+        l_5.pub.unregister()
+        l_6.pub.unregister()
+        r_2.pub.unregister()
+        r_3.pub.unregister()
+        r_4.pub.unregister()
+        r_5.pub.unregister()
+        r_6.pub.unregister()
         print('-----------------walk_error-------------------')
         return 0
-# print(walk_test(0.41, 0.1, 0.47))
+
+
+i = 0
+# while True:
+#     # initiate_time = random.choice([x / 100 for x in range(40, 71)])
+#     # T_dbl = random.choice([0.09, 0.1])
+#     # zc = random.choice([x / 100 for x in range(40, 71)])
+#     # i+=1
+#     # print(i)
+#     print(walk_test(0.48, 0.08, 0.41,0.05))
+#     # print(walk_test(initiate_time,T_dbl, zc))
+# #

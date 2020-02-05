@@ -7,7 +7,6 @@ import rospy
 from geometry_msgs.msg import Point
 import subprocess
 from mono_define import *
-
 rospy.init_node('mono_move')
 
 
@@ -95,7 +94,7 @@ while t <= initiate_time and show == False:
     rate.sleep()
 t = 0
 # while True:
-#     body.CoM = array([[0.07 * sin(3 * t), 0, initial_height]])
+#     body.CoM = array([[0.07 * sin(3 * t), 0.04 * sin(0 * t), initial_height]])
 #
 #     send_pelvis_data(body.CoM)
 #     angles_l = body.inverse_kinematics([0.09, 0, 0], "Left")
@@ -122,26 +121,30 @@ foot_last_pos = [0, 0]
 
 body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 
-# these are the best results initiate_time = 0.65 T_dbl = 0.1 zc = 0.6
-# initiate_time = 0.63
-# T_dbl = 0.08
+# initiate_time = 0.45
+# T_dbl = 0.09
 # speed = 0.01
-# zc = 0.6
-initiate_time = 0.5
-T_dbl = 0.09
-speed = 0.01
-zc = 0.5
+# zc = 0.44
+initiate_time = 0.48
+T_dbl = 0.08
+speed = 0.08
+zc = 0.41
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
 body.time_step = speed
 rate = rospy.Rate(1 / speed)
-
+step_count = 1
+print(p_mod)
+# TODO :- 1. store gait angles to array;
 while not rospy.is_shutdown():
-    if iteration >= len(ysolve) - 20:
+
+    if iteration >= len(ysolve) - 5:
+        print("End of walk------------", step_count)
         break
-    body.ros_subscribe()
+    # body.ros_subscribe()
     body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], initial_height]])
-    send_pelvis_data(body.CoM)
+    # send_pelvis_data(body.CoM)
     if abs(round(switch_timer, 3)) == 0:
+        print(step_count)
         if t == 0:
             step_multi = 0  # first step takes only 1 step size but the second step covers twice the d/s
             second_step = True
@@ -155,9 +158,16 @@ while not rospy.is_shutdown():
         if left_l:
             spline_h_l = CubicSpline([0, initiate_time / 2, initiate_time], [0, foot_height, 0],
                                      bc_type=(((1, 0)), (1, 0)))
+            # spline_y_l = CubicSpline([0, initiate_time],
+            #                          [body.links_l[6].end[0, 1], -step_multi * step_size + body.links_l[6].end[0, 1]],
+            #                          bc_type=(((1, 0)), (1, 0)))
             spline_y_l = CubicSpline([0, initiate_time],
-                                     [body.links_l[6].end[0, 1], -step_multi * step_size + body.links_l[6].end[0, 1]],
+                                     [body.links_l[6].end[0, 1], -p_mod[0, step_count]],
                                      bc_type=(((1, 0)), (1, 0)))
+            spline_x_l = CubicSpline([0, initiate_time],
+                                     [body.links_l[6].end[0, 0], p_mod[1, step_count]],
+                                     bc_type=(((1, 0)), (1, 0)))
+
             swing_leg = 'Left'
             switch_timer = initiate_time + T_dbl
             ds_timer = T_dbl
@@ -165,15 +175,21 @@ while not rospy.is_shutdown():
             foot_last_pos[0] = r_6.end[0, 0]
             foot_last_pos[1] = r_6.end[0, 1]
             angles_r = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Right')
-
-            angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(0), spline_h_l(0)], 'Left')
+            angles_l = body.inverse_kinematics([spline_x_l(0), spline_y_l(0), spline_h_l(0)], 'Left')
+            step_count += 1
             # k = speed
         if not left_l:
             spline_h_r = CubicSpline([0, initiate_time / 2, initiate_time], [0, foot_height, 0],
                                      bc_type=((1, 0), (1, 0)))
+            # spline_y_r = CubicSpline([0, initiate_time],
+            #                          [body.links_r[6].end[0, 1], -step_multi * step_size + body.links_r[6].end[0, 1]],
+            #                          bc_type=((1, 0), (1, 0)))
             spline_y_r = CubicSpline([0, initiate_time],
-                                     [body.links_r[6].end[0, 1], -step_multi * step_size + body.links_r[6].end[0, 1]],
-                                     bc_type=((1, 0), (1, 0)))
+                                     [body.links_r[6].end[0, 1], -p_mod[0, step_count]],
+                                     bc_type=(((1, 0)), (1, 0)))
+            spline_x_r = CubicSpline([0, initiate_time],
+                                     [body.links_r[6].end[0, 0], p_mod[1, step_count]],
+                                     bc_type=(((1, 0)), (1, 0)))
             swing_leg = 'Right'
             switch_timer = initiate_time + T_dbl
             ds_timer = T_dbl
@@ -182,8 +198,8 @@ while not rospy.is_shutdown():
             foot_last_pos[0] = l_6.end[0, 0]
             foot_last_pos[1] = l_6.end[0, 1]
             angles_l = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Left')
-            angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(0), spline_h_r(0)], 'Right')
-            # print(foot_last_pos)
+            angles_r = body.inverse_kinematics([spline_x_r(0), spline_y_r(0), spline_h_r(0)], 'Right')
+            step_count += 1
         left_l = not left_l
 
 
@@ -202,7 +218,7 @@ while not rospy.is_shutdown():
                 switch_timer = 0
                 t += speed
                 continue
-            angles_l = body.inverse_kinematics([foot_origin_ds, spline_y_l(k), spline_h_l(k)], 'Left')
+            angles_l = body.inverse_kinematics([spline_x_l(k), spline_y_l(k), spline_h_l(k)], 'Left')
             angles_r = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Right')
             # print("this is in main", end=" ")
             # print(rad2deg(angles_l))
@@ -220,7 +236,7 @@ while not rospy.is_shutdown():
                 switch_timer = 0
                 t += speed
                 continue
-            angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(k), spline_h_r(k)], 'Right')
+            angles_r = body.inverse_kinematics([spline_x_r(k), spline_y_r(k), spline_h_r(k)], 'Right')
             angles_l = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Left')
             # print("this is in main after hit", end=" ")
             # print(rad2deg(angles_l))
@@ -229,6 +245,7 @@ while not rospy.is_shutdown():
     body.get_all_pos()
     body.ros_publish()
     iteration += 1
+
     rate.sleep()
 
 # plt.plot(time,Y)

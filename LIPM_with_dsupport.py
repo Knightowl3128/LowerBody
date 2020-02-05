@@ -17,7 +17,7 @@ def LIPM(speed, T_supp, T_dbl, zc):
 
     # wp = array([[0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0],
     #             [0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18]])
-    size = 200
+    size = 300
     first = .09 * ones((1, size))
     second = 0.18 * ones((1, size))
     temp = concatenate((first, second), axis=0)
@@ -67,7 +67,7 @@ def LIPM(speed, T_supp, T_dbl, zc):
             py_mod = -(a * (C - 1) / D) * (yd - C * yi - Tc * S * vi_y) - (b * S / (Tc * D)) * (
                     vd_y - (S / Tc) * yi - C * vi_y)
             p_mod[0, n + 1] = px_mod
-            p_mod[1, n + 1] = py_mod
+            p_mod[1, n + 1] = py_mod - 0.09
         else:
             px_mod = 0
             py_mod = 0
@@ -129,15 +129,15 @@ def LIPM(speed, T_supp, T_dbl, zc):
         vi_y = vysolve[-1]
 
     return xsolve, vxsolve, ysolve, vysolve, p_mod
-
-
-T_supp = 0.5
-T_dbl = 0.1
-speed = 0.01
-zc = 0.6
-xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, T_supp, T_dbl, zc)
-
+#
+#
+# T_supp = 0.5
+# T_dbl = 0.1
+# speed = 0.01
+# zc = 0.6
+# xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, T_supp, T_dbl, zc)
+#
 # t = linspace(0, (4)*(T_supp+T_dbl), len(vxsolve))
-# print(p_mod)
-# plt.plot(t, ysolve)
+# # print(p_mod)
+# plt.plot(t, vysolve)
 # plt.show()
