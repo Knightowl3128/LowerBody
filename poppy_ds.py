@@ -92,7 +92,6 @@ while t <= initiate_time and show == False:
 
     t += speed
     rate.sleep()
-t = 0
 # while True:
 #     body.CoM = array([[0.07 * sin(3 * t), 0.04 * sin(0 * t), initial_height]])
 #
@@ -129,11 +128,12 @@ initiate_time = 0.48
 T_dbl = 0.08
 speed = 0.08
 zc = 0.41
-xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
+size = 100
+xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc, size)
 body.time_step = speed
 rate = rospy.Rate(1 / speed)
 step_count = 1
-print(p_mod)
+final_angles = array([])
 # TODO :- 1. store gait angles to array;
 while not rospy.is_shutdown():
 

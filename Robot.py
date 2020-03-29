@@ -357,3 +357,16 @@ class Robot(Link):
                     val.pub.publish(msg)
             listnow = self.links_r
         pass
+
+    def get_current_angles(self):
+        listnow = self.links_r
+        angles_data = []
+        for i in range(2):
+            for index, val in enumerate(listnow):
+                if val.id < 20:
+                    if val.name == 'Hip_2':
+                        angles_data.append(val.q - pi / 2)
+                    else:
+                        angles_data.append(val.q)
+            listnow = self.links_l
+        return angles_data

@@ -1,113 +1,56 @@
-#!/usr/bin/env python3
+import pybullet as p
+import time
+import pybullet_data
 from Robot import *
 from numpy import *
-import matplotlib.pyplot as plt
 from LIPM_with_dsupport import *
-import rospy
-from geometry_msgs.msg import Point
-import subprocess
 from mono_define import *
 
-rospy.init_node('mono_move')
+physicsClient = p.connect(p.GUI)
+p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
+p.setGravity(0, 0, -9.81)
+planeId = p.loadURDF("plane.urdf")
+cubeStartPos = [0, 0, 0.764]
+cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
+boxId = p.loadURDF("/home/navaneeth/mysim/src/mono/urdf/mono_bullet.urdf", cubeStartPos, cubeStartOrientation)
 
-show = False
+t = 0
+speed = 0.005
+initiate_time = 3
+joint_indices = [x for x in range(0, 12)]
 
-l_2.pub = rospy.Publisher('/mono/l_hip_roll_position/command', Float64, queue_size=1)
-l_3.pub = rospy.Publisher('/mono/l_hip_pitch_position/command', Float64, queue_size=1)
-l_4.pub = rospy.Publisher('/mono/l_knee_pitch_position/command', Float64, queue_size=1)
-l_5.pub = rospy.Publisher('/mono/l_ankle_pitch_position/command', Float64, queue_size=1)
-l_6.pub = rospy.Publisher('/mono/l_ankle_roll_position/command', Float64, queue_size=1)
-
-r_2.pub = rospy.Publisher('/mono/r_hip_roll_position/command', Float64, queue_size=1)
-r_3.pub = rospy.Publisher('/mono/r_hip_pitch_position/command', Float64, queue_size=1)
-r_4.pub = rospy.Publisher('/mono/r_knee_pitch_position/command', Float64, queue_size=1)
-r_5.pub = rospy.Publisher('/mono/r_ankle_pitch_position/command', Float64, queue_size=1)
-r_6.pub = rospy.Publisher('/mono/r_ankle_roll_position/command', Float64, queue_size=1)
-
-# rospy.Subscriber("chatter", String, callback)
-
-if not show:
-
-    initiate_time = 5
-    speed = 0.01
-    angles_l = [0, 0, pi / 2, 0, 0, 0, 0]
-    angles_r = [0, 0, pi / 2, 0, 0, 0, 0]
-    body.set_angle(angles_l, 'Left')
-    body.set_angle(angles_r, 'Right')
-    body.get_all_pos()
-
-    s = subprocess.check_call("rosservice call /gazebo/reset_simulation \"{}\"", shell=True)
-    rospy.sleep(0.1)
-    body.ros_publish()
-    s = subprocess.check_call("rosservice call /gazebo/reset_simulation \"{}\"", shell=True)
-    rospy.sleep(0.4)
-
-    r = subprocess.check_call("rosservice call gazebo/unpause_physics", shell=True)
-    rospy.sleep(0.4)
-
-else:
-    initiate_time = 5
-    speed = 0.1
-
-
-def send_pelvis_data(pos):
-    msg = Point()
-    msg.x = -pos[0, 0]
-    msg.y = -pos[0, 1]
-    msg.z = pos[0, 2]
-    pub.publish(msg)
-
-
-pub = rospy.Publisher('python_pelvis_data', Point, queue_size=1)
-rate = rospy.Rate(1 / speed)
-#####initiate##########
-# spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
-#                         [-1.5707963267948966, 0.5610612566993562, -1.0000099541506042],initiate_time)
+mode = p.POSITION_CONTROL
 
 initial_height = 0.70
 
 body.CoM = array([[0.015 - 0.09, 0, initial_height]])
-# body.CoM = array([[0, 0, initial_height]])
 
 spline_1, spline_2, spline_3 = body.transition_angle([pi / 2, 0, 0],
                                                      body.inverse_kinematics([0.09, 0, 0], "Left")[2:],
                                                      initiate_time)
+angles_l = [0, 0, pi / 2, 0, 0, 0, 0]
+angles_r = [0, 0, pi / 2, 0, 0, 0, 0]
+body.set_angle(angles_l, 'Left')
+body.set_angle(angles_r, 'Right')
+body.get_all_pos()
 
-# spline_1, spline_2, spline_3 = body.transition_angle([-pi / 2, 0, 0],
-#                                                      [-1.4204248987877621, 0.5362958375469041, -0.9566801401928506],
-#                                                      initiate_time)
-msg = Float64()
-# bending the knees
-t = 0
-while t <= initiate_time and show == False:
-    send_pelvis_data(body.CoM)
-    print(1)
+print(p.getJointInfo(boxId, 1)[10])
+max_forces = []
+for i in joint_indices:
+    # max_forces.append(p.getJointInfo(boxId,i)[10])
+    max_forces.append(10)
+while t <= initiate_time:
     angles_l = [0, 0, spline_1(t), spline_2(t), spline_3(t), pi / 2]
     angles_r = [0, 0, spline_1(t), spline_2(t), spline_3(t), pi / 2]
 
     body.set_angle(angles_l, 'Left')
     body.set_angle(angles_r, 'Right')
     body.get_all_pos()
-    body.ros_publish()
-
+    angles = body.get_current_angles()
+    p.setJointMotorControlArray(boxId, joint_indices, mode, angles)
     t += speed
-    rate.sleep()
-t = 0
-# while True:
-#     body.CoM = array([[0.07 * sin(3 * t), 0.04 * sin(0 * t), initial_height]])
-#
-#     send_pelvis_data(body.CoM)
-#     angles_l = body.inverse_kinematics([0.09, 0, 0], "Left")
-#     angles_r = body.inverse_kinematics([-0.09, 0, 0], "Right")
-#
-#     body.set_angle(angles_l, 'Left')
-#     body.set_angle(angles_r, 'Right')
-#     body.get_all_pos()
-#     body.ros_publish()
-#
-#     t += speed
-#     rate.sleep()
-
+    p.stepSimulation()
+    # time.sleep(1. / 240.)
 
 t = 0
 foot_height = 0.05
@@ -121,26 +64,22 @@ foot_last_pos = [0, 0]
 
 body.CoM = array([[0.015 - 0.09, 0, initial_height]])
 
-# initiate_time = 0.45
-# T_dbl = 0.09
-# speed = 0.01
-# zc = 0.44
-initiate_time = 0.48
+initiate_time = 0.46
 T_dbl = 0.08
-speed = 0.01
-zc = 0.41
-size = 30
+zc = 0.47
+size = 400
 xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc, size)
 body.time_step = speed
-publish_speed = 0.01
-rate = rospy.Rate(1 / publish_speed)
 step_count = 1
-final_angles = array([[[0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0]]])
-print("This is len", len(xsolve))
+final_angles = array([])
 
-# TODO :- 1. store gait angles to array;
-for _ in range(len(xsolve)):
+# zmp_id = p.createVisualShape(p.GEOM_SPHERE,0.03,rgbaColor=[255,0,0,1])
 
+
+while True:
+    if iteration >= len(ysolve) - 5:
+        print("End of walk------------", step_count)
+        break
     # body.ros_subscribe()
     body.CoM = array([[ysolve[iteration] - 0.09, -xsolve[iteration], initial_height]])
     # send_pelvis_data(body.CoM)
@@ -243,22 +182,14 @@ for _ in range(len(xsolve)):
             # print(rad2deg(angles_l))
     body.set_angle(angles_l, 'Left')
     body.set_angle(angles_r, 'Right')
-    temp = array([[angles_l], [angles_r]])
-    final_angles = concatenate((final_angles, temp), axis=1)
-    body.get_all_pos()
-    # body.ros_publish()
-    iteration += 1
+    # x_zmp, y_zmp = body.find_zmp()
+    # id = p.createMultiBody(baseVisualShapeIndex=zmp_id, basePosition=[-y_zmp, x_zmp, 0])
 
-i = 1
-while not rospy.is_shutdown():
-    angles_l = final_angles[0, i]
-    angles_r = final_angles[1, i]
-    body.set_angle(angles_l, 'Left')
-    body.set_angle(angles_r, 'Right')
-    body.ros_publish()
-    i += 1
-    rate.sleep()
-print("done")
-# plt.plot(time,Y)
-# plt.plot(time,traj(time)[1])
-# plt.show()
+    body.get_all_pos()
+    angles = body.get_current_angles()
+    p.setJointMotorControlArray(boxId, joint_indices, mode, angles, forces=max_forces)
+    p.stepSimulation()
+    # p.removeBody(id)
+    # time.sleep(1. / 240.)
+    iteration += 1
+p.disconnect()

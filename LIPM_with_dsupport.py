@@ -2,7 +2,7 @@ from numpy import *
 import matplotlib.pyplot as plt
 
 
-def LIPM(speed, T_supp, T_dbl, zc):
+def LIPM(speed, T_supp, T_dbl, zc, size):
     # zc = .6
     g = 9.810
     # initial condition
@@ -17,7 +17,7 @@ def LIPM(speed, T_supp, T_dbl, zc):
 
     # wp = array([[0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0],
     #             [0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18]])
-    size = 300
+
     first = .09 * ones((1, size))
     second = 0.18 * ones((1, size))
     temp = concatenate((first, second), axis=0)
