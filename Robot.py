@@ -1,9 +1,9 @@
 from numpy import *
 from Link import *
 from scipy.interpolate import CubicSpline
-import rospy
-from std_msgs.msg import Float64
-from control_msgs.msg import JointControllerState
+# import rospy
+# from std_msgs.msg import Float64
+# from control_msgs.msg import JointControllerState
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 

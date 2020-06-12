@@ -9,25 +9,9 @@ body.name = 'Mono'
 ux = array([[1, 0, 0]])
 uy = array([[0, 1, 0]])
 uz = array([[0, 0, 1]])
+
 # creating the core and the corresponding links
 # name, id, mass, direction, mother, child)
-# core_l = Link('Centre', 0, 0.18520035953947, 'Left', None, 1)
-# l_1 = Link('Hip_1', 1, .0843835237958419, 'Left', 0, 2)
-# l_2 = Link('Hip_2', 2, 0.0831707898707576, 'Left', 1, 3)
-# l_3 = Link('Thigh', 3, 0.116386255838466, 'Left', 2, 4)
-# l_4 = Link('Knee', 4, 0.115582219792398, 'Left', 3, 5)
-# l_5 = Link('Ankle_p', 5, 0.0467879950319091, 'Left', 4, None)
-# l_6 = Link('Ankle_r', 6, 0.0467879950319091, 'Left', 5, None)
-#
-#
-# core_r = Link('Centre', 0, 0, 'Right', None, 1)
-# r_1 = Link('Hip_1', 1, .0843835237958419, 'Right', 0, 2)
-# r_2 = Link('Hip_2', 2, 0.0831707898707576, 'Right', 1, 3)
-# r_3 = Link('Thigh', 3, 0.116386255838466, 'Right', 2, 4)
-# r_4 = Link('Knee', 4, 0.115582219792398, 'Right', 3, 5)
-# r_5 = Link('Ankle_p', 5, 0.0467879950319091, 'Right', 4, None)
-# r_6 = Link('Ankle_r', 6, 0.0467879950319091, 'Right', 5, None)
-
 core_l = Link('Centre', 1001, 1.664564, 'Left', None, 1)
 l_1 = Link('Hip_1', 6, 0.090718, 'Left', 0, 2)
 l_2 = Link('Hip_2', 7, 0.342, 'Left', 1, 3)

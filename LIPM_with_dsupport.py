@@ -40,7 +40,7 @@ def LIPM(speed, T_supp, T_dbl, zc, size):
     while True:
         if n == N - 1:
             break
-        t = linspace(0, T_supp, T_supp / speed + 1)
+        t = linspace(0, T_supp, int(T_supp / speed) + 1)
         if n != -1:
 
             x_bar = (wp[0, n + 1]) / 2
@@ -95,7 +95,7 @@ def LIPM(speed, T_supp, T_dbl, zc, size):
         a2 = X[0, 0]
         a3 = X[1, 0]
         a4 = X[2, 0]
-        t = linspace(0, T_dbl, T_dbl / speed + 1)
+        t = linspace(0, T_dbl, int(T_dbl / speed) + 1)
         dbl_x = a0 + a1 * t + a2 * t ** 2 + a3 * t ** 3 + a4 * t ** 4
         dbl_vx = a1 + 2 * a2 * t + 3 * a3 * t ** 2 + 4 * a4 * t ** 3
         a0 = y[-1]

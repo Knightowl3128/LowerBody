@@ -12,7 +12,11 @@ p.setGravity(0, 0, -9.81)
 planeId = p.loadURDF("plane.urdf")
 cubeStartPos = [0, 0, 0.764]
 cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
-boxId = p.loadURDF("/home/navaneeth/mysim/src/mono/urdf/mono_bullet.urdf", cubeStartPos, cubeStartOrientation)
+# for ubuntu
+# boxId = p.loadURDF("/home/navaneeth/mysim/src/mono/urdf/mono_bullet.urdf", cubeStartPos, cubeStartOrientation)
+
+# for windows
+boxId = p.loadURDF(r"D:\Robotics\Biped\bullet_urdf\bullet.urdf", cubeStartPos, cubeStartOrientation)
 
 t = 0
 speed = 0.005
