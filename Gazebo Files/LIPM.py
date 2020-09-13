@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def LIPM(speed, T_supp, zc):
-    t = linspace(0, T_supp, T_supp / speed)
+    t = linspace(0, T_supp, int(T_supp / speed))
 
     g = 9.810
 
@@ -90,11 +90,12 @@ def LIPM(speed, T_supp, zc):
         vi_y = v_y[-1]
     return xsolve, vxsolve, ysolve, vysolve, p_mod
 
-# T_supp = 0.6
-# speed = 0.1
-# zc = 0.6
-# xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed,T_supp,zc)
-# print(ysolve)
-# t = linspace(0, 5* T_supp, len(ysolve))
-# plt.plot(t, ysolve)
-# plt.show()
+
+T_supp = 0.6
+speed = 0.1
+zc = 0.6
+xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, T_supp, zc)
+print(ysolve)
+t = linspace(0, 5 * T_supp, len(ysolve))
+plt.plot(t, ysolve)
+plt.show()

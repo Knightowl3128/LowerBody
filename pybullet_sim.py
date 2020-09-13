@@ -39,6 +39,8 @@ body.set_angle(angles_r, 'Right')
 body.get_all_pos()
 
 print(p.getJointInfo(boxId, 1)[10])
+print('-------------------')
+print(body.find_CoM_Pos())
 max_forces = []
 for i in joint_indices:
     # max_forces.append(p.getJointInfo(boxId,i)[10])

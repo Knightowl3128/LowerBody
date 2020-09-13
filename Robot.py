@@ -229,36 +229,6 @@ class Robot(Link):
         y_zmp = (total * 9.81 * pos[0, 1] + dH[0, 0]) / (total * 9.81 + dP[0, 2])  # TODO fix this dH its wrong
         return x_zmp, y_zmp
 
-    # def find_zmp(self):
-    #     listnow = self.links_l
-    #     dH = 0
-    #     dP = 0
-    #     for i in range(2):
-    #         w = zeros((3, 1))  # angular velocity in 3x1 matrix
-    #         alpha = zeros((3, 1))  # angular acceleration in 3x1 matrix
-    #         for index, val in enumerate(listnow):
-    #
-    #             dP = dP + val.mass*val.com_acc
-    #             R = listnow[index].trans_mat[0:3, 0:3]
-    #             w = w +  listnow[index-1].trans_mat[0:3, 0:3]*(val.dq * val.a.T)
-    #             alpha = alpha +  listnow[index-1].trans_mat[0:3, 0:3]*(val.ddq * val.a.T)
-    #             I = R * val.I * R.T
-    #             foo = cross(val.com_pos, val.mass * val.com_acc).T + I * alpha
-    #             foo = foo +  cross(w.T, (I * w).T).T
-    #             dH = dH+  foo
-    #         # print('THis is dP',end="")
-    #         # print(dH)
-    #         pos, total = self.find_CoM_Pos()
-    #         # print('THis is total mass', end="")
-    #         # print(total)
-    #         dH = array([[0],[0],[0]])
-    #         dP = array([[0,0,0]])
-    #         x_zmp = (total * 9.81 * pos[0, 0] - dH[1, 0]) / (total * 9.81 + dP[0, 2])
-    #         y_zmp = (total * 9.81 * pos[0, 1] - dH[0, 0]) / (total * 9.81 + dP[0, 2])
-    #         return x_zmp, y_zmp
-    #
-    #     pass
-
     def moveit(self, pos, direction):
         # does not support yaw
         # we assume 1 while loop takes 1 millisecond

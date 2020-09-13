@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-from Robot import *
-from numpy import *
-import matplotlib.pyplot as plt
 from LIPM import *
 import rospy
 from std_msgs.msg import Float64
@@ -159,7 +156,7 @@ while not rospy.is_shutdown():
             k = initiate_time - switch_timer
             # k+=speed
             if round(k, 3) == initiate_time:
-                t += speed
+                t += spee
                 continue
             angles_r = body.inverse_kinematics([-foot_origin_ds, spline_y_r(k), spline_h_r(k)], 'Right')
             angles_l = body.inverse_kinematics([foot_last_pos[0], foot_last_pos[1], 0], 'Left')

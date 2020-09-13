@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-from Robot import *
-from numpy import *
-import matplotlib.pyplot as plt
 from LIPM import *
 import rospy
 from std_msgs.msg import Float64
