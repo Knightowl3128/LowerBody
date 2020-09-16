@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import linalg as sci
+from scipy.optimize import fsolve
 
 T_supp = 0.6
 speed = 0.1
@@ -9,7 +10,7 @@ g = 9.81
 dt = 0.01
 steps = 6
 N = int(T_supp * steps / dt + 1)
-t = np.linspace(0, steps * T_supp, 780)
+t = np.linspace(0, steps * T_supp, int(steps * T_supp / dt) + 1)
 
 # Creating p_ref
 
@@ -20,8 +21,14 @@ p_ref_y = [0.09 for x in range(int(T_supp / dt))]
 for i in range(int(steps)):
     p_ref_y = p_ref_y + top + bot
 
+
+def ricatti(x):
+    x = x.reshape((3, 3))
+    return (A.T @ x @ A + C.T @ Q @ C - A.T @ x @ B @ np.linalg.inv(R + B.T @ x @ B) @ B.T @ x @ A - x).ravel()
+
+
 p_ref_y = np.array(p_ref_y).reshape((len(p_ref_y), 1))
-# print(p_ref_y)
+
 # defining State Space Matrices
 A = np.array([[1, dt, dt ** 2 / 2],
               [0, 1, dt],
@@ -32,16 +39,13 @@ B = np.array([[dt ** 3 / 6],
               [dt]])
 C = np.array([[1, 0, -zc / g]])
 
-Q = 1 * np.identity(1)  # check again
-R = 1e-6 * np.identity(1)
-# Solving dlqr-------------
-Q_total = np.array([[float(Q[0]), 0, 0], [0, 0, 0], [0, 0, 0]])
+Q = 1 * np.identity(1)
+R = 1e-8 * np.identity(1)
 
-# first, try to solve the ricatti equation
-X = (sci.solve_discrete_are(A, B, Q_total, R))
-
+ha = np.identity(3)
+X = fsolve(ricatti, ha.ravel())
+X = X.reshape((3, 3))
 K = sci.inv(B.T @ X @ B + R) @ (B.T @ X @ A)
-print(K)
 f = np.zeros((int(T_supp * steps / dt + 1), 1))
 
 foo = sci.inv(B.T @ X @ B + R)
@@ -67,7 +71,7 @@ for index, val in enumerate(t):
     p_actual[0, index] = C @ X[index]
 
 # print(X[:,0])
-plt.plot(t[0:360], p_ref_y[0:360], label='plan zmp')
+plt.plot(t, p_ref_y[0:360], label='plan zmp')
 plt.plot(t[0:360], X[:, 0], label='CoM Pos')
 # plt.plot(t[0:360],X[:,1],label = 'CoM Vel')
 plt.plot(t[0:360], p_actual.T, label='actual zmp')
