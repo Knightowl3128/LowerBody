@@ -122,8 +122,8 @@ class Robot(Link):
     def ik_nr(self, pos, direction):
         pass
 
-    def inverse_kinematics(self, pos, direction):
-
+    def inverse_kinematics(self, feet_pos, direction):
+        pos = feet_pos.copy()
         originPosition = list(self.CoM[0, :])
         if self.name == 'Original':
             off = 1
