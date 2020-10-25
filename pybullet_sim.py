@@ -1,8 +1,6 @@
 import pybullet as p
-import time
 import pybullet_data
-from Robot import *
-from numpy import *
+
 from LIPM_with_dsupport import *
 from mono_define import *
 
@@ -37,11 +35,11 @@ angles_r = [0, 0, pi / 2, 0, 0, 0, 0]
 body.set_angle(angles_l, 'Left')
 body.set_angle(angles_r, 'Right')
 body.get_all_pos()
-
 print(p.getJointInfo(boxId, 1)[10])
 print('-------------------')
 print(body.find_CoM_Pos())
 max_forces = []
+input()
 for i in joint_indices:
     # max_forces.append(p.getJointInfo(boxId,i)[10])
     max_forces.append(10)

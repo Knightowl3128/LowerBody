@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy import linalg as sci
 from scipy.optimize import fsolve
 
@@ -61,7 +61,7 @@ X[0, 0, 0] = 0.09
 # print(X)
 # print(K)
 p_actual = np.zeros((1, N))
-
+UHistory = np.zeros((1, N))
 for index, val in enumerate(t):
     if index == N - 1:
         break
@@ -69,11 +69,12 @@ for index, val in enumerate(t):
     X[index + 1] = A @ X[index] + B @ u_k
 
     p_actual[0, index] = C @ X[index]
-
+    UHistory[0, index] = u_k
 # print(X[:,0])
 plt.plot(t, p_ref_y[0:360], label='plan zmp')
 plt.plot(t[0:360], X[:, 0], label='CoM Pos')
 # plt.plot(t[0:360],X[:,1],label = 'CoM Vel')
 plt.plot(t[0:360], p_actual.T, label='actual zmp')
+plt.plot(t[0:360], UHistory.T, label='actual zmp')
 plt.legend()
 plt.show()

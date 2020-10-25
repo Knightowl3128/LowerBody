@@ -32,7 +32,7 @@ initiate_time = 0.48
 T_dbl = 0.05
 speed = 0.01
 zc = 0.41
-xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc)
+xsolve, vxsolve, ysolve, vysolve, p_mod = LIPM(speed, initiate_time, T_dbl, zc, 100)
 body.time_step = speed
 print(p_mod)
 k = 0
@@ -171,6 +171,7 @@ while True:
     # print('This is r6 ', r_6.end)
     ax.axes.set_ylim3d(bottom=-1 - iteration / 100, top=1)
     body.draw_all(ax)
+    plt.savefig(r'D:\Robotics\Reports\Presentation\GIF MAKE\foo' + str(iteration) + '.png')
 
     ax.scatter(body.find_CoM_Pos()[0][0, 0], body.find_CoM_Pos()[0][0, 1], body.find_CoM_Pos()[0][0, 2])
     ax.grid()

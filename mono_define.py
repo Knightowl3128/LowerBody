@@ -1,6 +1,6 @@
-from Robot import *
 from numpy import *
-import matplotlib.pyplot as plt
+
+from Robot import *
 
 # creating the robot
 body = Robot()
@@ -12,7 +12,8 @@ uz = array([[0, 0, 1]])
 
 # creating the core and the corresponding links
 # name, id, mass, direction, mother, child)
-core_l = Link('Centre', 1001, 1.664564, 'Left', None, 1)
+core_l = Link('Centre', 1001, 1.664564 / 2, 'Left', None,
+              1)  # Dividing the mass of hip between two list TODO: Improve this
 l_1 = Link('Hip_1', 6, 0.090718, 'Left', 0, 2)
 l_2 = Link('Hip_2', 7, 0.342, 'Left', 1, 3)
 l_3 = Link('Thigh', 8, 0.33732478, 'Left', 2, 4)
@@ -20,7 +21,7 @@ l_4 = Link('Knee', 9, 0.15100000, 'Left', 3, 5)
 l_5 = Link('Ankle_p', 10, 0.342, 'Left', 4, None)
 l_6 = Link('Ankle_r', 11, 0.155, 'Left', 5, None)
 
-core_r = Link('Centre', 100, 0, 'Right', None, 1)
+core_r = Link('Centre', 100, 1.664564 / 2, 'Right', None, 1)
 r_1 = Link('Hip_1', 0, 0.090718, 'Right', 0, 2)
 r_2 = Link('Hip_2', 1, 0.342, 'Right', 1, 3)
 r_3 = Link('Thigh', 2, 0.33732478, 'Right', 2, 4)

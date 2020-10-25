@@ -1,11 +1,12 @@
 from numpy import *
-from Link import *
 from scipy.interpolate import CubicSpline
+
+from Link import *
+
+
 # import rospy
 # from std_msgs.msg import Float64
 # from control_msgs.msg import JointControllerState
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
 
 
 class Robot(Link):
@@ -204,17 +205,25 @@ class Robot(Link):
             w = zeros((3, 1))  # angular velocity in 3x1 matrix
             alpha = zeros((3, 1))  # angular acceleration in 3x1 matrix
             for index, val in enumerate(listnow):
+                # print(val.name,val.com_pos,val.com_vel)
                 P += val.mass * val.com_vel
                 w = w + listnow[index - 1].trans_mat[0:3, 0:3] * (val.dq * val.a.T)
                 R = listnow[index].trans_mat[0:3, 0:3]
                 L = L + cross(val.com_pos, (val.mass * val.com_vel)).T + (R * val.I * R.T) * w
-
+            listnow = self.links_r
+        # print(self.links_l[3].end,self.links_r[3].end)
         self.dL = (L - self.L) / self.time_step
         self.dP = (P - self.P) / self.time_step
+        # print('this is p', P)
+        # if abs(self.dP[0,1])>=10:
+        #
+        #     print('----------------------------------------------------------------------------')
+        #     print('this is p', P)
+        #     print(self.links_l[3].end,self.links_r[3].end)
+        #     print('000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000')
         self.L = L
         self.P = P
         return L, P
-        pass
 
     def find_zmp(self):
 
@@ -225,6 +234,7 @@ class Robot(Link):
         # print(total)
         # dH = array([[0], [0], [0]])
         # dP = array([[0, 0, 0]])
+
         x_zmp = (total * 9.81 * pos[0, 0] - dH[1, 0]) / (total * 9.81 + dP[0, 2])
         y_zmp = (total * 9.81 * pos[0, 1] + dH[0, 0]) / (total * 9.81 + dP[0, 2])  # TODO fix this dH its wrong
         return x_zmp, y_zmp
