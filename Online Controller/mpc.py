@@ -1,5 +1,3 @@
-import os
-import sys
 import time
 
 import do_mpc
@@ -12,9 +10,9 @@ speed = 0.1
 zc = 0.46
 g = 9.81
 dt = 0.005
-steps = 10
+steps = 4
 N = int(T_supp * steps / dt + 1)
-N_Horizon = 200
+N_Horizon = 100
 step_size = 0.1
 
 # p_ref_y------
@@ -49,6 +47,7 @@ for step in range(int(steps)):
         continue
 p_ref_x = np.array(p_ref_x).reshape((len(p_ref_x), 1))
 
+# Model Definition
 A = np.array([[1, dt, dt ** 2 / 2],
               [0, 1, dt],
               [0, 0, 1]])
@@ -72,12 +71,7 @@ y_next = C @ _x
 model.set_rhs('x', x_next)
 model.set_rhs('y', y_next)
 
-# In[7]:
-
-
 model.setup()
-
-# In[8]:
 
 
 mpc = do_mpc.controller.MPC(model)
@@ -93,16 +87,11 @@ setup_mpc = {
 
 mpc.set_param(**setup_mpc)
 
-# In[9]:
-
 
 lterm = 100 * (model.x['y'] - model.tvp['p_ref']) ** 2
 mterm = 1 * (model.x['y'] - p_ref_y[N_Horizon, 0]) ** 2
 mpc.set_objective(mterm=mterm, lterm=lterm)
 mpc.set_rterm(u=1e-8)  # input penalty
-print(p_ref)
-# In[10]:
-
 
 mpc.bounds['lower', '_x', 'x'] = np.array([[-0.00], [-10], [-15]])
 mpc.bounds['upper', '_x', 'x'] = np.array([[0.19], [10], [10]])

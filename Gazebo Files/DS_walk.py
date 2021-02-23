@@ -169,15 +169,16 @@ while True:
     # print('This is angle r ',angles_r)
     # print('This is l6 ',l_6.end)
     # print('This is r6 ', r_6.end)
-    ax.axes.set_ylim3d(bottom=-1 - iteration / 100, top=1)
-    body.draw_all(ax)
-    plt.savefig(r'D:\Robotics\Reports\Presentation\GIF MAKE\foo' + str(iteration) + '.png')
+    # ax.axes.set_ylim3d(bottom=-1 - iteration / 100, top=1)
+    # body.draw_all(ax)
+    # # # plt.savefig(r'D:\Robotics\Reports\Presentation\GIF MAKE\foo' + str(iteration) + '.png')
+    #
+    # ax.scatter(body.find_CoM_Pos()[0][0, 0], body.find_CoM_Pos()[0][0, 1], body.find_CoM_Pos()[0][0, 2])
+    # ax.grid()
+    # plt.pause(0.000000000000000001)
+    # ax.cla()
 
-    ax.scatter(body.find_CoM_Pos()[0][0, 0], body.find_CoM_Pos()[0][0, 1], body.find_CoM_Pos()[0][0, 2])
-    ax.grid()
     t += speed
-    plt.pause(0.000000000000000001)
-    ax.cla()
 
 plt.figure(2)
 # time = linspace(0, 20, len(X))

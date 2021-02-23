@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.io as sio
 from scipy.interpolate import CubicSpline
 
 
@@ -14,17 +13,40 @@ class Walking():
 
         self.state = 'Double Support'
         self.swing_leg = 'Left'
-        self.foot_rise = 0.04
+        self.foot_rise = 0.02
         self.heightList = None
         self.step_size = 0.1
         self.step_multiplier = 1
         self.first_step = True
+        self.turn_degree = 10
+        self.contacts = []
+        self.feet_dist = 0.09  # distance b/w feet and hip
+        self.sp_counter = 0  # counter for single support phase
+        # Initial foot pos
+        self.foot_pos_r = [0, -self.feet_dist, 0]
+        self.foot_pos_l = [0, self.feet_dist, 0]
 
-        self.foot_pos_r = [0, -0.09, 0]
-        self.foot_pos_l = [0, 0.09, 0]
+        # self.p_ref_x = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\p_ref_x.mat', struct_as_record=False)['p_ref_x']
+        # self.p_ref_y = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\p_ref_y.mat', struct_as_record=False)['p_ref_y']
 
-        self.p_ref_x = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\p_ref_x.mat', struct_as_record=False)['p_ref_x']
-        self.p_ref_y = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\p_ref_y.mat', struct_as_record=False)['p_ref_y']
+        self.create_footsteps()
+
+    def create_footsteps(self, turn=False):
+        # Creating initial double support
+        # contacts[x,y,theta(foot rotation)]
+
+        self.contacts.append([0, -self.feet_dist, 0])
+        self.contacts.append([0, self.feet_dist, 0])
+
+        step_count = 10  # TODO: have to change this to take step length instead
+        x = 0
+        y = self.feet_dist
+        count = 0
+        while count < step_count:
+            x += self.step_size
+            y = -y
+            self.contacts.append([x, y, 0])
+            count += 1
 
     def sim(self, time):
         if self.state == 'Single Support':
@@ -42,28 +64,29 @@ class Walking():
 
         if self.swing_leg == 'Left':
             step_start_x = self.foot_pos_l[0]
+            # foot_1d_spline = CubicSpline([0, self.T_ssp],
+            #                              [step_start_x, step_start_x + self.step_multiplier * self.step_size],
+            #                              bc_type=(((1, 0)), (1, 0)))
             foot_1d_spline = CubicSpline([0, self.T_ssp],
-                                         [step_start_x, step_start_x + self.step_multiplier * self.step_size],
+                                         [self.contacts[self.sp_counter][0], self.contacts[self.sp_counter + 2][0]],
                                          bc_type=(((1, 0)), (1, 0)))
             self.foot_1d = foot_1d_spline(t)
-            # self.foot_1d = np.linspace(step_start_x,step_start_x + self.step_multiplier*self.step_size,(int(self.T_ssp/self.dt)))
         elif self.swing_leg == 'Right':
             step_start_x = self.foot_pos_r[0]
             foot_1d_spline = CubicSpline([0, self.T_ssp],
-                                         [step_start_x, step_start_x + self.step_multiplier * self.step_size],
+                                         [self.contacts[self.sp_counter][0], self.contacts[self.sp_counter + 2][0]],
                                          bc_type=(((1, 0)), (1, 0)))
             self.foot_1d = foot_1d_spline(t)
-            # self.foot_1d = np.linspace(step_start_x, step_start_x + self.step_multiplier*self.step_size, (int(self.T_ssp / self.dt)))
         else:
             raise Exception('Invalid Swing Leg:', self.swing_leg)
-
+        self.sp_counter +=1
         self.step_multiplier = 2
 
     def single_support(self, time):
 
         if self.T_ssp - self.timer >= 1e-8:  # temp. fix for timing error
             if self.swing_leg == 'Left':
-                index = int(round(self.timer / self.dt, 4))  # Fixing up some kind of rounding error TODO
+                index = int(round(self.timer / self.dt, 3))  # Fixing up some kind of rounding error TODO
                 self.foot_pos_l = [self.foot_1d[index], 0.09, self.heightList[index]]
                 self.timer += self.dt
                 return self.foot_pos_l, self.foot_pos_r
@@ -99,6 +122,8 @@ class Walking():
         print('Double Support Ended at time:', time)
         return self.single_support(time)
 
+    def turning(self):
+        pass
 
 if __name__ == '__main__':
     T_supp = 0.6

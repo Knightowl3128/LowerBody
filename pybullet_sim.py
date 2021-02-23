@@ -39,7 +39,7 @@ print(p.getJointInfo(boxId, 1)[10])
 print('-------------------')
 print(body.find_CoM_Pos())
 max_forces = []
-input()
+
 for i in joint_indices:
     # max_forces.append(p.getJointInfo(boxId,i)[10])
     max_forces.append(10)

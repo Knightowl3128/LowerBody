@@ -10,6 +10,7 @@ p.setGravity(0, 0, -9.81)
 planeId = p.loadURDF("plane.urdf")
 cubeStartPos = [0, 0, 0.764]
 cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
+
 # for ubuntu
 # boxId = p.loadURDF("/home/navaneeth/mysim/src/mono/urdf/mono_bullet.urdf", cubeStartPos, cubeStartOrientation)
 
@@ -77,8 +78,12 @@ final_angles = array([])
 
 # zmp_id = p.createVisualShape(p.GEOM_SPHERE,0.03,rgbaColor=[255,0,0,1])
 
-com_pos_x = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\com_x.mat', struct_as_record=False)['ympc'][:, 1]
-com_pos_y = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\com_y.mat', struct_as_record=False)['ympc'][:, 1]
+# com_pos_x = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\com_x.mat', struct_as_record=False)['ympc'][:, 1]
+# com_pos_y = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\com_y.mat', struct_as_record=False)['ympc'][:, 1]
+
+com_pos_x = sio.loadmat(r'D:\Matlab Projects\MPC\com_x.mat', struct_as_record=False)['com_x']
+com_pos_y = sio.loadmat(r'D:\Matlab Projects\MPC\com_y.mat', struct_as_record=False)['com_y']
+
 # with open('Online Controller/com_x.npy', 'rb') as f:
 #     foo = np.load(f)
 #     com_pos_x = np.reshape(foo, (np.size(foo),))
@@ -87,14 +92,14 @@ com_pos_y = sio.loadmat(r'D:\Matlab Projects\MPC\New MPC\com_y.mat', struct_as_r
 #     com_pos_y = np.reshape(foo,(np.size(foo),))
 
 zmp_list = []
-
 zmp_id = p.createVisualShape(p.GEOM_SPHERE, 0.03, rgbaColor=[255, 0, 0, 1])
-speed = 1 / 240
-mpc_step = 0.005
-foo = Walking(1, T_ssp, T_dsp, speed)
 
+mpc_step = 1 / 240
+foo = Walking(1, T_ssp, T_dsp, speed)
+speed = 1 / 240
 while True:
     index = int(round(t / mpc_step, 4))
+    print(index)
     body.CoM = array([[(-com_pos_y[index] - 0.09), -com_pos_x[index], initial_height]])
     # body.CoM = array([[ (-com_pos_y[int(t/mpc_step)]-0.09), -com_pos_x[int(t/mpc_step)], initial_height]])
     foot_pos_l, foot_pos_r = foo.sim(t)
